@@ -13976,25 +13976,31 @@ a.anchor-link {
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Ever since 1951, the NBA All-Star game has occurred annually. Twenty-four of the best players in the NBA are selected, by a mix of fan voting and head coaches, to compete in this prestigious game. (There can end up being more than 24, due to injuries). Each year, as the teams are announced, there is an abundance of discussion regarding the choices. Why did this player make it over this player? Why was this player chosen? I think that if we can look at the analytics behind which players are selected and which are left out, we can better understand the process, as well as make predictions on who will make it before the teams are announced.</p>
+<p>Ever since 1951, the NBA All-Star game has occurred annually. Twenty-four of the best players in the NBA are selected, by a mix of fan voting and head coaches, to compete in this prestigious game. (There can end up being more than 24, due to injuries). Each year, as the teams are announced, there is an abundance of discussion regarding the choices. Why did this player make it over this player? Why was this player chosen?I think that if we can look at the analytics behind which players are selected and which are left out, we can better understand the process, as well as make predictions on who will make it before the teams are even announced.</p>
+<p>The goal for this project is to create a model for predicting which players will be selected to the All Star team. We will collect players statistics from the past 10 years (2009-10 season until 2019-20 season), and look at which players made the all star teams which years, and use this to create a decision tree. The decision tree will be able to predict how likely a player is to be selected to the all star team based on their statistics. We will be analyzing our results throughout the project, to see where we can improve to get as accurate of a model as possible.</p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Step-1:-Getting-the-data">Step 1: Getting the data<a class="anchor-link" href="#Step-1:-Getting-the-data">&#182;</a></h2>
+<h2 id="Step-1:-Getting-the-Data">Step 1: Getting the Data<a class="anchor-link" href="#Step-1:-Getting-the-Data">&#182;</a></h2>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>First we will import the libraries we will need to do our analysis. We will use pandas, in order to create dataframes, re to do regular expression operations, and statsmodels to do statistical analysis.</p>
+
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[251]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 <span class="kn">import</span> <span class="nn">statsmodels.formula.api</span> <span class="k">as</span> <span class="nn">smf</span>
-<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
 </pre></div>
 
      </div>
@@ -14002,29 +14008,795 @@ a.anchor-link {
 </div>
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we are going to create a dataframe with all the NBA players stats for each year from 2010-2020. To get the stats, go to <a href="https://www.basketball-reference.com/leagues/NBA_2022_per_game.html">https://www.basketball-reference.com/leagues/NBA_2022_per_game.html</a>. This website has all the NBA stats for every season in NBA history. On the table, click "share and export" and export as csv. Copy the table. Next, in either Excel or Numbers, paste the table, and export it as a csv into your project folder.</p>
+<p>Now, using Pandas, we will read the data into a dataframe. A dataframe is a two-dimensional table, with relational data. To learn more about pandas dataframes, see <a href="https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#:~:text=to%20different%20objects.-,DataFrame,most%20commonly%20used%20pandas%20object">https://pandas.pydata.org/pandas-docs/stable/user_guide/dsintro.html#:~:text=to%20different%20objects.-,DataFrame,most%20commonly%20used%20pandas%20object</a>.</p>
+<p>Below you will see how read in the 2010 NBA data into a dataframe:</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[252]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA10.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2010</span>
+<span class="n">data</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[252]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Rk</th>
+      <th>Player</th>
+      <th>Pos</th>
+      <th>Age</th>
+      <th>Tm</th>
+      <th>G</th>
+      <th>GS</th>
+      <th>MP</th>
+      <th>FG</th>
+      <th>FGA</th>
+      <th>...</th>
+      <th>ORB</th>
+      <th>DRB</th>
+      <th>TRB</th>
+      <th>AST</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>TOV</th>
+      <th>PF</th>
+      <th>PTS</th>
+      <th>Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>Arron Afflalo\afflaar01</td>
+      <td>SG</td>
+      <td>24</td>
+      <td>DEN</td>
+      <td>82</td>
+      <td>75</td>
+      <td>27.1</td>
+      <td>3.3</td>
+      <td>7.1</td>
+      <td>...</td>
+      <td>0.7</td>
+      <td>2.4</td>
+      <td>3.1</td>
+      <td>1.7</td>
+      <td>0.6</td>
+      <td>0.4</td>
+      <td>0.9</td>
+      <td>2.7</td>
+      <td>8.8</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>Alexis Ajinça\ajincal01</td>
+      <td>C</td>
+      <td>21</td>
+      <td>CHA</td>
+      <td>6</td>
+      <td>0</td>
+      <td>5.0</td>
+      <td>0.8</td>
+      <td>1.7</td>
+      <td>...</td>
+      <td>0.2</td>
+      <td>0.5</td>
+      <td>0.7</td>
+      <td>0.0</td>
+      <td>0.2</td>
+      <td>0.2</td>
+      <td>0.3</td>
+      <td>0.8</td>
+      <td>1.7</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>LaMarcus Aldridge\aldrila01</td>
+      <td>PF</td>
+      <td>24</td>
+      <td>POR</td>
+      <td>78</td>
+      <td>78</td>
+      <td>37.5</td>
+      <td>7.4</td>
+      <td>15.0</td>
+      <td>...</td>
+      <td>2.5</td>
+      <td>5.6</td>
+      <td>8.0</td>
+      <td>2.1</td>
+      <td>0.9</td>
+      <td>0.6</td>
+      <td>1.3</td>
+      <td>3.0</td>
+      <td>17.9</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>Joe Alexander\alexajo01</td>
+      <td>SF</td>
+      <td>23</td>
+      <td>CHI</td>
+      <td>8</td>
+      <td>0</td>
+      <td>3.6</td>
+      <td>0.1</td>
+      <td>0.8</td>
+      <td>...</td>
+      <td>0.3</td>
+      <td>0.4</td>
+      <td>0.6</td>
+      <td>0.3</td>
+      <td>0.1</td>
+      <td>0.1</td>
+      <td>0.0</td>
+      <td>1.1</td>
+      <td>0.5</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>Malik Allen\allenma01</td>
+      <td>PF</td>
+      <td>31</td>
+      <td>DEN</td>
+      <td>51</td>
+      <td>3</td>
+      <td>8.9</td>
+      <td>0.9</td>
+      <td>2.3</td>
+      <td>...</td>
+      <td>0.7</td>
+      <td>0.9</td>
+      <td>1.6</td>
+      <td>0.3</td>
+      <td>0.2</td>
+      <td>0.1</td>
+      <td>0.4</td>
+      <td>1.3</td>
+      <td>2.1</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>573</th>
+      <td>438</td>
+      <td>Dorell Wright\wrighdo01</td>
+      <td>SF</td>
+      <td>24</td>
+      <td>MIA</td>
+      <td>72</td>
+      <td>1</td>
+      <td>20.8</td>
+      <td>2.7</td>
+      <td>5.8</td>
+      <td>...</td>
+      <td>0.7</td>
+      <td>2.6</td>
+      <td>3.3</td>
+      <td>1.3</td>
+      <td>0.7</td>
+      <td>0.4</td>
+      <td>0.7</td>
+      <td>1.3</td>
+      <td>7.1</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>574</th>
+      <td>439</td>
+      <td>Julian Wright\wrighju01</td>
+      <td>SF</td>
+      <td>22</td>
+      <td>NOH</td>
+      <td>68</td>
+      <td>14</td>
+      <td>12.8</td>
+      <td>1.7</td>
+      <td>3.4</td>
+      <td>...</td>
+      <td>0.9</td>
+      <td>1.3</td>
+      <td>2.1</td>
+      <td>0.6</td>
+      <td>0.4</td>
+      <td>0.3</td>
+      <td>0.6</td>
+      <td>0.7</td>
+      <td>3.8</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>575</th>
+      <td>440</td>
+      <td>Nick Young\youngni01</td>
+      <td>SG</td>
+      <td>24</td>
+      <td>WAS</td>
+      <td>74</td>
+      <td>23</td>
+      <td>19.2</td>
+      <td>3.1</td>
+      <td>7.5</td>
+      <td>...</td>
+      <td>0.3</td>
+      <td>1.1</td>
+      <td>1.4</td>
+      <td>0.6</td>
+      <td>0.4</td>
+      <td>0.1</td>
+      <td>0.8</td>
+      <td>2.0</td>
+      <td>8.6</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>576</th>
+      <td>441</td>
+      <td>Sam Young\youngsa01</td>
+      <td>SF</td>
+      <td>24</td>
+      <td>MEM</td>
+      <td>80</td>
+      <td>1</td>
+      <td>16.5</td>
+      <td>2.8</td>
+      <td>6.2</td>
+      <td>...</td>
+      <td>1.0</td>
+      <td>1.6</td>
+      <td>2.5</td>
+      <td>0.7</td>
+      <td>0.4</td>
+      <td>0.3</td>
+      <td>1.2</td>
+      <td>1.3</td>
+      <td>7.4</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>577</th>
+      <td>442</td>
+      <td>Thaddeus Young\youngth01</td>
+      <td>PF</td>
+      <td>21</td>
+      <td>PHI</td>
+      <td>67</td>
+      <td>45</td>
+      <td>32.0</td>
+      <td>5.7</td>
+      <td>12.1</td>
+      <td>...</td>
+      <td>1.9</td>
+      <td>3.3</td>
+      <td>5.2</td>
+      <td>1.4</td>
+      <td>1.2</td>
+      <td>0.2</td>
+      <td>1.9</td>
+      <td>2.0</td>
+      <td>13.8</td>
+      <td>2010</td>
+    </tr>
+  </tbody>
+</table>
+<p>578 rows × 31 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>As you can see, the above data contains 578 entries, one for each player in the NBA that season. If we have to do that for 10 seasons, the dataframe will be approximately 5000 entries, which would be way too huge to look at easily, and it would make operations very slow.</p>
+<p>According to StatMuse.com, the last time a player made an NBA all star team with lower than 10 points per game was 2004, which is before our data. Therefore, to make things easier, we can drop all players who average less than 10 points per game.</p>
+<p>We will accomplish this with the following function:</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[253]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Function that drops players who averaged less than 10 ppg</span>
-<span class="k">def</span> <span class="nf">drop_under_10</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">drop_under_10</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">10.0</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span>
+</pre></div>
 
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA10.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-<span class="n">data</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2010</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">drop_under_10</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+     </div>
+</div>
+</div>
+</div>
 
-<span class="n">data2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA11.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we will apply it to our dataframe for 2010 NBA data.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[254]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">drop_under_10</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">data</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[254]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Rk</th>
+      <th>Player</th>
+      <th>Pos</th>
+      <th>Age</th>
+      <th>Tm</th>
+      <th>G</th>
+      <th>GS</th>
+      <th>MP</th>
+      <th>FG</th>
+      <th>FGA</th>
+      <th>...</th>
+      <th>ORB</th>
+      <th>DRB</th>
+      <th>TRB</th>
+      <th>AST</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>TOV</th>
+      <th>PF</th>
+      <th>PTS</th>
+      <th>Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>LaMarcus Aldridge\aldrila01</td>
+      <td>PF</td>
+      <td>24</td>
+      <td>POR</td>
+      <td>78</td>
+      <td>78</td>
+      <td>37.5</td>
+      <td>7.4</td>
+      <td>15.0</td>
+      <td>...</td>
+      <td>2.5</td>
+      <td>5.6</td>
+      <td>8.0</td>
+      <td>2.1</td>
+      <td>0.9</td>
+      <td>0.6</td>
+      <td>1.3</td>
+      <td>3.0</td>
+      <td>17.9</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>6</td>
+      <td>Ray Allen*\allenra02</td>
+      <td>SG</td>
+      <td>34</td>
+      <td>BOS</td>
+      <td>80</td>
+      <td>80</td>
+      <td>35.2</td>
+      <td>5.8</td>
+      <td>12.2</td>
+      <td>...</td>
+      <td>0.6</td>
+      <td>2.6</td>
+      <td>3.2</td>
+      <td>2.6</td>
+      <td>0.8</td>
+      <td>0.3</td>
+      <td>1.6</td>
+      <td>2.3</td>
+      <td>16.3</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>14</td>
+      <td>Carmelo Anthony\anthoca01</td>
+      <td>SF</td>
+      <td>25</td>
+      <td>DEN</td>
+      <td>69</td>
+      <td>69</td>
+      <td>38.2</td>
+      <td>10.0</td>
+      <td>21.8</td>
+      <td>...</td>
+      <td>2.2</td>
+      <td>4.4</td>
+      <td>6.6</td>
+      <td>3.2</td>
+      <td>1.3</td>
+      <td>0.4</td>
+      <td>3.0</td>
+      <td>3.3</td>
+      <td>28.2</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>16</td>
+      <td>Gilbert Arenas\arenagi01</td>
+      <td>PG</td>
+      <td>28</td>
+      <td>WAS</td>
+      <td>32</td>
+      <td>32</td>
+      <td>36.5</td>
+      <td>7.9</td>
+      <td>19.3</td>
+      <td>...</td>
+      <td>0.5</td>
+      <td>3.6</td>
+      <td>4.2</td>
+      <td>7.2</td>
+      <td>1.3</td>
+      <td>0.3</td>
+      <td>3.7</td>
+      <td>3.0</td>
+      <td>22.6</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>17</td>
+      <td>Trevor Ariza\arizatr01</td>
+      <td>SF</td>
+      <td>24</td>
+      <td>HOU</td>
+      <td>72</td>
+      <td>71</td>
+      <td>36.5</td>
+      <td>5.5</td>
+      <td>13.9</td>
+      <td>...</td>
+      <td>1.1</td>
+      <td>4.5</td>
+      <td>5.6</td>
+      <td>3.8</td>
+      <td>1.8</td>
+      <td>0.6</td>
+      <td>2.2</td>
+      <td>2.3</td>
+      <td>14.9</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>565</th>
+      <td>430</td>
+      <td>Marvin Williams\willima02</td>
+      <td>SF</td>
+      <td>23</td>
+      <td>ATL</td>
+      <td>81</td>
+      <td>81</td>
+      <td>30.5</td>
+      <td>3.7</td>
+      <td>8.2</td>
+      <td>...</td>
+      <td>1.3</td>
+      <td>3.8</td>
+      <td>5.1</td>
+      <td>1.1</td>
+      <td>0.8</td>
+      <td>0.6</td>
+      <td>0.9</td>
+      <td>2.0</td>
+      <td>10.1</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>566</th>
+      <td>431</td>
+      <td>Mo Williams\willima01</td>
+      <td>PG</td>
+      <td>27</td>
+      <td>CLE</td>
+      <td>69</td>
+      <td>68</td>
+      <td>34.2</td>
+      <td>5.5</td>
+      <td>12.4</td>
+      <td>...</td>
+      <td>0.4</td>
+      <td>2.6</td>
+      <td>3.0</td>
+      <td>5.3</td>
+      <td>1.0</td>
+      <td>0.3</td>
+      <td>2.5</td>
+      <td>2.5</td>
+      <td>15.8</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>567</th>
+      <td>432</td>
+      <td>Reggie Williams\willire02</td>
+      <td>SF</td>
+      <td>23</td>
+      <td>GSW</td>
+      <td>24</td>
+      <td>10</td>
+      <td>32.6</td>
+      <td>5.8</td>
+      <td>11.8</td>
+      <td>...</td>
+      <td>0.8</td>
+      <td>3.8</td>
+      <td>4.6</td>
+      <td>2.8</td>
+      <td>1.0</td>
+      <td>0.3</td>
+      <td>1.2</td>
+      <td>2.0</td>
+      <td>15.2</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>571</th>
+      <td>436</td>
+      <td>Metta World Peace\artesro01</td>
+      <td>SF</td>
+      <td>30</td>
+      <td>LAL</td>
+      <td>77</td>
+      <td>77</td>
+      <td>33.8</td>
+      <td>4.0</td>
+      <td>9.6</td>
+      <td>...</td>
+      <td>1.3</td>
+      <td>3.0</td>
+      <td>4.3</td>
+      <td>3.0</td>
+      <td>1.4</td>
+      <td>0.3</td>
+      <td>1.6</td>
+      <td>2.1</td>
+      <td>11.0</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>577</th>
+      <td>442</td>
+      <td>Thaddeus Young\youngth01</td>
+      <td>PF</td>
+      <td>21</td>
+      <td>PHI</td>
+      <td>67</td>
+      <td>45</td>
+      <td>32.0</td>
+      <td>5.7</td>
+      <td>12.1</td>
+      <td>...</td>
+      <td>1.9</td>
+      <td>3.3</td>
+      <td>5.2</td>
+      <td>1.4</td>
+      <td>1.2</td>
+      <td>0.2</td>
+      <td>1.9</td>
+      <td>2.0</td>
+      <td>13.8</td>
+      <td>2010</td>
+    </tr>
+  </tbody>
+</table>
+<p>179 rows × 31 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>As you can see, we have now managed to bring the size of our data frame down to 179 rows.</p>
+<p>Now, we will get the rest of the data. Just as we did with the 2010 data, we will do with the next year, 2011.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[255]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA11.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 <span class="n">data2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2011</span>
 <span class="n">data2</span> <span class="o">=</span> <span class="n">drop_under_10</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">,</span><span class="n">data2</span><span class="p">])</span>
+</pre></div>
 
-<span class="n">data2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA12.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Next, we will add the two dataframes together.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[257]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">,</span><span class="n">data2</span><span class="p">])</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we will repeat this process with the data for the rest of the years.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[258]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA12.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 <span class="n">data2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2012</span>
 <span class="n">data2</span> <span class="o">=</span> <span class="n">drop_under_10</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">data</span><span class="p">,</span><span class="n">data2</span><span class="p">])</span>
@@ -14077,14 +14849,368 @@ a.anchor-link {
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[259]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#https://basketball.realgm.com/nba/allstar/game/rosters/2011</span>
-<span class="n">allstars</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;AllStars10.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[259]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Rk</th>
+      <th>Player</th>
+      <th>Pos</th>
+      <th>Age</th>
+      <th>Tm</th>
+      <th>G</th>
+      <th>GS</th>
+      <th>MP</th>
+      <th>FG</th>
+      <th>FGA</th>
+      <th>...</th>
+      <th>ORB</th>
+      <th>DRB</th>
+      <th>TRB</th>
+      <th>AST</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>TOV</th>
+      <th>PF</th>
+      <th>PTS</th>
+      <th>Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>3.0</td>
+      <td>LaMarcus Aldridge\aldrila01</td>
+      <td>PF</td>
+      <td>24</td>
+      <td>POR</td>
+      <td>78</td>
+      <td>78</td>
+      <td>37.5</td>
+      <td>7.4</td>
+      <td>15.0</td>
+      <td>...</td>
+      <td>2.5</td>
+      <td>5.6</td>
+      <td>8.0</td>
+      <td>2.1</td>
+      <td>0.9</td>
+      <td>0.6</td>
+      <td>1.3</td>
+      <td>3.0</td>
+      <td>17.9</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>6.0</td>
+      <td>Ray Allen*\allenra02</td>
+      <td>SG</td>
+      <td>34</td>
+      <td>BOS</td>
+      <td>80</td>
+      <td>80</td>
+      <td>35.2</td>
+      <td>5.8</td>
+      <td>12.2</td>
+      <td>...</td>
+      <td>0.6</td>
+      <td>2.6</td>
+      <td>3.2</td>
+      <td>2.6</td>
+      <td>0.8</td>
+      <td>0.3</td>
+      <td>1.6</td>
+      <td>2.3</td>
+      <td>16.3</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>14.0</td>
+      <td>Carmelo Anthony\anthoca01</td>
+      <td>SF</td>
+      <td>25</td>
+      <td>DEN</td>
+      <td>69</td>
+      <td>69</td>
+      <td>38.2</td>
+      <td>10.0</td>
+      <td>21.8</td>
+      <td>...</td>
+      <td>2.2</td>
+      <td>4.4</td>
+      <td>6.6</td>
+      <td>3.2</td>
+      <td>1.3</td>
+      <td>0.4</td>
+      <td>3.0</td>
+      <td>3.3</td>
+      <td>28.2</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>16.0</td>
+      <td>Gilbert Arenas\arenagi01</td>
+      <td>PG</td>
+      <td>28</td>
+      <td>WAS</td>
+      <td>32</td>
+      <td>32</td>
+      <td>36.5</td>
+      <td>7.9</td>
+      <td>19.3</td>
+      <td>...</td>
+      <td>0.5</td>
+      <td>3.6</td>
+      <td>4.2</td>
+      <td>7.2</td>
+      <td>1.3</td>
+      <td>0.3</td>
+      <td>3.7</td>
+      <td>3.0</td>
+      <td>22.6</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>17.0</td>
+      <td>Trevor Ariza\arizatr01</td>
+      <td>SF</td>
+      <td>24</td>
+      <td>HOU</td>
+      <td>72</td>
+      <td>71</td>
+      <td>36.5</td>
+      <td>5.5</td>
+      <td>13.9</td>
+      <td>...</td>
+      <td>1.1</td>
+      <td>4.5</td>
+      <td>5.6</td>
+      <td>3.8</td>
+      <td>1.8</td>
+      <td>0.6</td>
+      <td>2.2</td>
+      <td>2.3</td>
+      <td>14.9</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2052</th>
+      <td>NaN</td>
+      <td>Justise Winslow</td>
+      <td>SF</td>
+      <td>23</td>
+      <td>MIA</td>
+      <td>11</td>
+      <td>5</td>
+      <td>32.0</td>
+      <td>4.5</td>
+      <td>11.7</td>
+      <td>...</td>
+      <td>1.5</td>
+      <td>5.2</td>
+      <td>6.6</td>
+      <td>4.0</td>
+      <td>0.6</td>
+      <td>0.5</td>
+      <td>2.2</td>
+      <td>3.5</td>
+      <td>11.3</td>
+      <td>2020</td>
+    </tr>
+    <tr>
+      <th>2053</th>
+      <td>NaN</td>
+      <td>Christian Wood</td>
+      <td>PF</td>
+      <td>24</td>
+      <td>DET</td>
+      <td>62</td>
+      <td>12</td>
+      <td>21.4</td>
+      <td>4.6</td>
+      <td>8.2</td>
+      <td>...</td>
+      <td>1.7</td>
+      <td>4.6</td>
+      <td>6.3</td>
+      <td>1.0</td>
+      <td>0.5</td>
+      <td>0.9</td>
+      <td>1.4</td>
+      <td>1.6</td>
+      <td>13.1</td>
+      <td>2020</td>
+    </tr>
+    <tr>
+      <th>2054</th>
+      <td>NaN</td>
+      <td>Thaddeus Young</td>
+      <td>PF</td>
+      <td>31</td>
+      <td>CHI</td>
+      <td>64</td>
+      <td>16</td>
+      <td>24.9</td>
+      <td>4.2</td>
+      <td>9.4</td>
+      <td>...</td>
+      <td>1.5</td>
+      <td>3.5</td>
+      <td>4.9</td>
+      <td>1.8</td>
+      <td>1.4</td>
+      <td>0.4</td>
+      <td>1.6</td>
+      <td>2.1</td>
+      <td>10.3</td>
+      <td>2020</td>
+    </tr>
+    <tr>
+      <th>2055</th>
+      <td>NaN</td>
+      <td>Trae Young</td>
+      <td>PG</td>
+      <td>21</td>
+      <td>ATL</td>
+      <td>60</td>
+      <td>60</td>
+      <td>35.3</td>
+      <td>9.1</td>
+      <td>20.8</td>
+      <td>...</td>
+      <td>0.5</td>
+      <td>3.7</td>
+      <td>4.3</td>
+      <td>9.3</td>
+      <td>1.1</td>
+      <td>0.1</td>
+      <td>4.8</td>
+      <td>1.7</td>
+      <td>29.6</td>
+      <td>2020</td>
+    </tr>
+    <tr>
+      <th>2056</th>
+      <td>NaN</td>
+      <td>Cody Zeller</td>
+      <td>C</td>
+      <td>27</td>
+      <td>CHO</td>
+      <td>58</td>
+      <td>39</td>
+      <td>23.1</td>
+      <td>4.3</td>
+      <td>8.3</td>
+      <td>...</td>
+      <td>2.8</td>
+      <td>4.3</td>
+      <td>7.1</td>
+      <td>1.5</td>
+      <td>0.7</td>
+      <td>0.4</td>
+      <td>1.3</td>
+      <td>2.4</td>
+      <td>11.1</td>
+      <td>2020</td>
+    </tr>
+  </tbody>
+</table>
+<p>2057 rows × 31 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>As you can see, we currently have a dataframe with 2057 rows that contains the stats of every player (who scored over 10 points per game) from the year 2010 to 2020.</p>
+<p>Next, we need to mark down whether or not the player made the All Star team that year.</p>
+<p>To accomplish this, we will make a dataframe with all the All Star Selections between 2010 and 2020.</p>
+<p>To get the data, go to <a href="https://basketball.realgm.com/nba/allstar/game/rosters/2010">https://basketball.realgm.com/nba/allstar/game/rosters/2010</a>. Highlight the table and paste it in either Excel or Numbers. Export as a csv and add it to your file. Repeat this process for the years 2011-2020.</p>
+<p>Next, read it into a pandas dataframe like we did above, and add a column, Year, with the year the data comes from.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[260]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">allstars</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;AllStars10.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 <span class="n">allstars</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2010</span> 
 
 <span class="n">allstars2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;AllStars11.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
@@ -14130,6 +15256,8 @@ a.anchor-link {
 <span class="n">allstars2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;AllStars20.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 <span class="n">allstars2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2020</span>
 <span class="n">allstars</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">allstars</span><span class="p">,</span> <span class="n">allstars2</span><span class="p">])</span>
+
+<span class="n">allstars</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -14137,18 +15265,136 @@ a.anchor-link {
 </div>
 </div>
 
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[260]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Player</th>
+      <th>Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Carmelo Anthony</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Chauncey Billups</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Kobe Bryant</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Tim Duncan</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Kevin Durant</td>
+      <td>2010</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We now have a dataframe with all the All Stars from 2010-2020.</p>
+<p>Now, we need to add a column in our original dataframe that indicated whether or not a player made the All Star team that year.</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[261]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;All Star&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="k">def</span> <span class="nf">was_allstar</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>A player will have a 1 if they made the team, and a 0 if they did not.</p>
+<p>Now, we will make a method that returns true if a player made an all star team. It works by taking as input a players name and the year. It will search through the All Star dataframe, and return true if that player and year is located in the dataframe.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[262]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">was_allstar</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">allstars</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">year</span> <span class="o">==</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">True</span> 
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we will go through the dataframe of stats and call this method for every player. If the method returns true, we will add a 1 in the All Star column and a 0 if it returns false.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[263]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">was_allstar</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">])):</span>
         <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;All Star&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 </pre></div>
@@ -14158,80 +15404,13 @@ a.anchor-link {
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Cleaning out the names</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">[a-z]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">]):</span>
-       <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">[a-z]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">])</span>
-       <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Player&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;PlayerStats.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pos&#39;</span><span class="p">,</span> <span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;GS&#39;</span><span class="p">,</span> <span class="s1">&#39;MP&#39;</span><span class="p">,</span> <span class="s1">&#39;FG&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;3P&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span> <span class="s1">&#39;2P&#39;</span><span class="p">,</span> <span class="s1">&#39;2PA&#39;</span><span class="p">,</span> <span class="s1">&#39;2P%&#39;</span><span class="p">,</span> <span class="s1">&#39;3PA&#39;</span><span class="p">,</span> <span class="s1">&#39;eFG%&#39;</span><span class="p">,</span> <span class="s1">&#39;FT&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;FT%&#39;</span><span class="p">,</span> <span class="s1">&#39;ORB&#39;</span><span class="p">,</span> <span class="s1">&#39;DRB&#39;</span><span class="p">,</span> <span class="s1">&#39;PF&#39;</span><span class="p">])</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">tree</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[264]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">()</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span><span class="s1">&#39;Tm&#39;</span><span class="p">,</span><span class="s1">&#39;Year&#39;</span><span class="p">,</span><span class="s1">&#39;All Star&#39;</span><span class="p">])</span>
-<span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All Star&#39;</span><span class="p">]</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span> <span class="mf">0.3</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span><span class="n">y_train</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -14247,97 +15426,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>RandomForestClassifier()</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[21]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>0.912621359223301</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[77]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nba21</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA21.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-<span class="n">nba21</span><span class="p">[</span><span class="s1">&#39;All Star %&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-<span class="n">nba21</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[77]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[264]:</div>
 
 
 
@@ -14365,105 +15454,148 @@ a.anchor-link {
       <th>Pos</th>
       <th>Age</th>
       <th>Tm</th>
-      <th>FG%</th>
-      <th>3P%</th>
+      <th>G</th>
+      <th>GS</th>
+      <th>MP</th>
+      <th>FG</th>
+      <th>FGA</th>
+      <th>...</th>
+      <th>DRB</th>
       <th>TRB</th>
       <th>AST</th>
       <th>STL</th>
       <th>BLK</th>
       <th>TOV</th>
+      <th>PF</th>
       <th>PTS</th>
-      <th>All Star %</th>
+      <th>Year</th>
+      <th>All Star</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>1</td>
-      <td>Precious Achiuwa\achiupr01</td>
-      <td>C</td>
-      <td>22</td>
-      <td>TOR</td>
-      <td>0.386</td>
-      <td>0.269</td>
-      <td>8.2</td>
-      <td>1.6</td>
-      <td>0.5</td>
-      <td>0.6</td>
-      <td>1.1</td>
+      <td>3.0</td>
+      <td>LaMarcus Aldridge\aldrila01</td>
+      <td>PF</td>
+      <td>24</td>
+      <td>POR</td>
+      <td>78</td>
+      <td>78</td>
+      <td>37.5</td>
+      <td>7.4</td>
+      <td>15.0</td>
+      <td>...</td>
+      <td>5.6</td>
       <td>8.0</td>
-      <td>0.0</td>
+      <td>2.1</td>
+      <td>0.9</td>
+      <td>0.6</td>
+      <td>1.3</td>
+      <td>3.0</td>
+      <td>17.9</td>
+      <td>2010</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>2</td>
-      <td>Steven Adams\adamsst01</td>
-      <td>C</td>
-      <td>28</td>
-      <td>MEM</td>
-      <td>0.535</td>
-      <td>NaN</td>
-      <td>8.8</td>
+      <td>6.0</td>
+      <td>Ray Allen*\allenra02</td>
+      <td>SG</td>
+      <td>34</td>
+      <td>BOS</td>
+      <td>80</td>
+      <td>80</td>
+      <td>35.2</td>
+      <td>5.8</td>
+      <td>12.2</td>
+      <td>...</td>
       <td>2.6</td>
-      <td>0.9</td>
-      <td>0.6</td>
-      <td>1.8</td>
-      <td>7.0</td>
-      <td>0.0</td>
+      <td>3.2</td>
+      <td>2.6</td>
+      <td>0.8</td>
+      <td>0.3</td>
+      <td>1.6</td>
+      <td>2.3</td>
+      <td>16.3</td>
+      <td>2010</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>3</td>
-      <td>Bam Adebayo\adebaba01</td>
-      <td>C</td>
-      <td>24</td>
-      <td>MIA</td>
-      <td>0.519</td>
-      <td>0.000</td>
-      <td>10.2</td>
+      <td>14.0</td>
+      <td>Carmelo Anthony\anthoca01</td>
+      <td>SF</td>
+      <td>25</td>
+      <td>DEN</td>
+      <td>69</td>
+      <td>69</td>
+      <td>38.2</td>
+      <td>10.0</td>
+      <td>21.8</td>
+      <td>...</td>
+      <td>4.4</td>
+      <td>6.6</td>
       <td>3.2</td>
-      <td>1.1</td>
-      <td>0.3</td>
-      <td>2.9</td>
-      <td>18.7</td>
-      <td>0.0</td>
+      <td>1.3</td>
+      <td>0.4</td>
+      <td>3.0</td>
+      <td>3.3</td>
+      <td>28.2</td>
+      <td>2010</td>
+      <td>1</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>4</td>
-      <td>Santi Aldama\aldamsa01</td>
-      <td>PF</td>
-      <td>21</td>
-      <td>MEM</td>
-      <td>0.364</td>
-      <td>0.111</td>
-      <td>2.6</td>
-      <td>0.8</td>
-      <td>0.1</td>
-      <td>0.2</td>
-      <td>0.3</td>
+      <td>16.0</td>
+      <td>Gilbert Arenas\arenagi01</td>
+      <td>PG</td>
+      <td>28</td>
+      <td>WAS</td>
+      <td>32</td>
+      <td>32</td>
+      <td>36.5</td>
+      <td>7.9</td>
+      <td>19.3</td>
+      <td>...</td>
       <td>3.6</td>
-      <td>0.0</td>
+      <td>4.2</td>
+      <td>7.2</td>
+      <td>1.3</td>
+      <td>0.3</td>
+      <td>3.7</td>
+      <td>3.0</td>
+      <td>22.6</td>
+      <td>2010</td>
+      <td>0</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>5</td>
-      <td>LaMarcus Aldridge\aldrila01</td>
-      <td>C</td>
-      <td>36</td>
-      <td>BRK</td>
-      <td>0.573</td>
-      <td>0.367</td>
-      <td>5.7</td>
-      <td>0.9</td>
-      <td>0.4</td>
-      <td>1.2</td>
-      <td>0.8</td>
-      <td>14.0</td>
-      <td>0.0</td>
+      <td>17.0</td>
+      <td>Trevor Ariza\arizatr01</td>
+      <td>SF</td>
+      <td>24</td>
+      <td>HOU</td>
+      <td>72</td>
+      <td>71</td>
+      <td>36.5</td>
+      <td>5.5</td>
+      <td>13.9</td>
+      <td>...</td>
+      <td>4.5</td>
+      <td>5.6</td>
+      <td>3.8</td>
+      <td>1.8</td>
+      <td>0.6</td>
+      <td>2.2</td>
+      <td>2.3</td>
+      <td>14.9</td>
+      <td>2010</td>
+      <td>0</td>
     </tr>
   </tbody>
 </table>
+<p>5 rows × 32 columns</p>
 </div>
 </div>
 
@@ -14473,15 +15605,23 @@ a.anchor-link {
 
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, the last column contains whether or not they made the All Star team.</p>
+<p>Currently, the dataframe has the players Twitter handle as well in the "Player" column. That is not good to look at, so we will create a method that will remove it from the dataframe. The method uses regular expressions to find the "\" and removes anything after it.</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[90]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[265]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pos&#39;</span><span class="p">,</span><span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;Tm&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span> <span class="s1">&#39;All Star %&#39;</span><span class="p">])</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">[a-z]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">]):</span>
+       <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">[a-z]&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">])</span>
+       <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Player&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
 </pre></div>
 
      </div>
@@ -14489,13 +15629,20 @@ a.anchor-link {
 </div>
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In our model, we will only be looking at what I consider to be the most important, basic stats to consider.
+Age, Points per game, Field Goal Percentage, Rebounds, Assists, Steals, Blocks, and Turnovers. Therefore, we will drop the columns with all of the other information.</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[91]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[266]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pos&#39;</span><span class="p">,</span> <span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;GS&#39;</span><span class="p">,</span> <span class="s1">&#39;MP&#39;</span><span class="p">,</span> <span class="s1">&#39;FG&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;3P&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span> <span class="s1">&#39;2P&#39;</span><span class="p">,</span> <span class="s1">&#39;2PA&#39;</span><span class="p">,</span> <span class="s1">&#39;2P%&#39;</span><span class="p">,</span> <span class="s1">&#39;3PA&#39;</span><span class="p">,</span> <span class="s1">&#39;eFG%&#39;</span><span class="p">,</span> <span class="s1">&#39;FT&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;FT%&#39;</span><span class="p">,</span> <span class="s1">&#39;ORB&#39;</span><span class="p">,</span> <span class="s1">&#39;DRB&#39;</span><span class="p">,</span> <span class="s1">&#39;PF&#39;</span><span class="p">])</span>
 </pre></div>
 
      </div>
@@ -14503,18 +15650,29 @@ a.anchor-link {
 </div>
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Step-2:-Creating-the-Model">Step 2: Creating the Model<a class="anchor-link" href="#Step-2:-Creating-the-Model">&#182;</a></h2>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we will create our model. We will be creating a random forest of decision trees. A decision tree is a machine learning tool that will create branches based on inputs, and output a decision. In this case, it will take as input all the stats in the dataframe, and output whether or not that player will make the All Star team.</p>
+<p>To learn more about decision trees, check out this article: <a href="https://scikit-learn.org/stable/modules/tree.html">https://scikit-learn.org/stable/modules/tree.html</a>.</p>
+<p>Import the following in order to make a decision tree model:</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[100]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[267]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-<span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">nba21</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-    <span class="n">nba21</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;All Star %&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">441</span><span class="p">:</span>
-        <span class="k">break</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">tree</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span>
 </pre></div>
 
      </div>
@@ -14522,19 +15680,22 @@ a.anchor-link {
 </div>
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We will be making our model using a random forest. A random forest is a method that will make 100 different decision trees, and aggregate the results of each in order to make the best tree.</p>
+<p>We will divide the dataframe into "inputs" and "target". Inputs is all the stats we want the model to consider, and target is whether or not the player made the all star team.</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[110]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[268]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">east</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PHI&#39;</span><span class="p">,</span> <span class="s1">&#39;BRK&#39;</span><span class="p">,</span> <span class="s1">&#39;MIL&#39;</span><span class="p">,</span> <span class="s1">&#39;NYK&#39;</span><span class="p">,</span> <span class="s1">&#39;ATL&#39;</span><span class="p">,</span> <span class="s1">&#39;MIA&#39;</span><span class="p">,</span> <span class="s1">&#39;BOS&#39;</span><span class="p">,</span> <span class="s1">&#39;WAS&#39;</span><span class="p">,</span><span class="s1">&#39;IND&#39;</span><span class="p">,</span> <span class="s1">&#39;CHA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHI&#39;</span><span class="p">,</span> <span class="s1">&#39;TOR&#39;</span><span class="p">,</span> <span class="s1">&#39;CLE&#39;</span><span class="p">,</span> <span class="s1">&#39;ORL&#39;</span><span class="p">,</span> <span class="s1">&#39;DET&#39;</span><span class="p">]</span>
-<span class="n">nba21</span><span class="p">[</span><span class="s1">&#39;Conference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">nba21</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-    <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Tm&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">east</span><span class="p">:</span>
-        <span class="n">nba21</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Conference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;East&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">nba21</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Conference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;West&#39;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">()</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span><span class="s1">&#39;Tm&#39;</span><span class="p">,</span><span class="s1">&#39;Year&#39;</span><span class="p">,</span><span class="s1">&#39;All Star&#39;</span><span class="p">])</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All Star&#39;</span><span class="p">]</span>
 </pre></div>
 
      </div>
@@ -14542,28 +15703,23 @@ a.anchor-link {
 </div>
 </div>
 
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[113]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Conference&#39;</span><span class="p">,</span><span class="s1">&#39;All Star %&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
-<span class="n">nba21</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;AllStarPredictions.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-</pre></div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Next, we will split our data so we can do cross validation. Cross validation is a term in machine learning that means that we will split our data into training data and testing data. Then, we will build the model based on the training data, and evaluate how well the model works with the testing data. To learn more, see <a href="https://scikit-learn.org/stable/modules/cross_validation.html">https://scikit-learn.org/stable/modules/cross_validation.html</a>.</p>
+<p>We will be splitting our data into 80% as training data, and 20% as testing data.</p>
 
-     </div>
 </div>
-</div>
-</div>
-
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[115]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[269]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nba21</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span><span class="n">y_train</span><span class="p">)</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14579,7 +15735,602 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[115]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[269]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>0.9320388349514563</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Step-3:-Adding-advanced-stats-to-our-model">Step 3: Adding advanced stats to our model<a class="anchor-link" href="#Step-3:-Adding-advanced-stats-to-our-model">&#182;</a></h2><p>We have now created the model, and our model correctly predicted around 93.2% of our testing data! That is pretty good!</p>
+<p>However, I think that if we add advanced metrics into our model, we might even be able to do better.</p>
+<p>Advanced metrics are a set of statistics that show how efficient players are, as well as compares them with the rest of the league. To many, they are considered more accurate ways of seeing how good specific players are than traditional statistics.</p>
+<p>We will now create a dataframe of advanced statistics using the same method as traditional statistics we used earlier.</p>
+<p>We will be looking at the following advanced metrics:</p>
+<p>PER (Player Efficiency Rating): A metric that combines all traditional stats, compares to league averages, and adjusts for the total minutes played. The league average is always 15.0.</p>
+<p>TS% (True Shooting Percentage): A weighted average that takes into account 3-Point percentage, free-throw percentage, and regular 2-point percentage.</p>
+<p>WS (Win Shares): An estimate of the number of wins a player contricutes to their team.</p>
+<p>BPM (Box Plus Minus): Estimates the number of points a player contributed to their team per 100 possesions.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[270]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">drop_under_50</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In order to keep the data size from getting too big, we will drop players that played less than 50 games, as it is very unlikely one could make all All Star team with that few games (there are 82 games in a normal NBA Season).</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[271]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced10.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2010</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced</span><span class="p">)</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">advanced</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[272]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced11.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2011</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+
+<span class="c1"># Combining the dataframes</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced12.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2012</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced12.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2013</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced14.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2014</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced15.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2015</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced16.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2016</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced17.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2017</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced18.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2018</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced19.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2019</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;Advanced20.csv&#39;</span><span class="p">)</span>
+<span class="n">advanced2</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2020</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">drop_under_41</span><span class="p">(</span><span class="n">advanced2</span><span class="p">)</span>
+<span class="n">advanced2</span> <span class="o">=</span> <span class="n">advanced2</span><span class="p">[[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">,</span> <span class="s1">&#39;Year&#39;</span><span class="p">]]</span>
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">advanced</span><span class="p">,</span> <span class="n">advanced2</span><span class="p">])</span>
+
+<span class="n">advanced</span> <span class="o">=</span> <span class="n">advanced</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">advanced</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">[a-z]&#39;</span><span class="p">,</span> <span class="n">advanced</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">]):</span>
+       <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">[a-z]&#39;</span><span class="p">,</span> <span class="n">advanced</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">])</span>
+       <span class="n">advanced</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Player&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+       
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[273]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">advanced</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[273]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>index</th>
+      <th>Player</th>
+      <th>PER</th>
+      <th>TS%</th>
+      <th>WS</th>
+      <th>BPM</th>
+      <th>Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>Arron Afflalo</td>
+      <td>10.9</td>
+      <td>0.576</td>
+      <td>4.3</td>
+      <td>-0.4</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>LaMarcus Aldridge</td>
+      <td>18.2</td>
+      <td>0.535</td>
+      <td>8.8</td>
+      <td>1.2</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>4</td>
+      <td>Malik Allen</td>
+      <td>5.9</td>
+      <td>0.431</td>
+      <td>0.1</td>
+      <td>-5.7</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5</td>
+      <td>Ray Allen*</td>
+      <td>15.2</td>
+      <td>0.601</td>
+      <td>7.9</td>
+      <td>1.2</td>
+      <td>2010</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>6</td>
+      <td>Tony Allen</td>
+      <td>14.2</td>
+      <td>0.540</td>
+      <td>1.9</td>
+      <td>0.4</td>
+      <td>2010</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We now have a dataframe with all the NBA players advanced statistics for 2010-2020. Next, we want to add these stats to our original dataframe.</p>
+<p>We will create columns for those statistics, and set the default values to 0.0.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[274]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;PER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;BPM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We will create a method that returns a players advanced metrics for that year. This method works by calling a query on the advanced data dataframe. It will return a tuple of the players advanced stats.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[275]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_advanced</span><span class="p">(</span><span class="n">player</span><span class="p">,</span> <span class="n">year</span><span class="p">):</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">advanced</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;Player == @player and Year == @year&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">stats</span><span class="o">.</span><span class="n">empty</span><span class="p">):</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;PER&#39;</span><span class="p">],</span> <span class="n">stats</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;TS%&#39;</span><span class="p">],</span> <span class="n">stats</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">],</span> <span class="n">stats</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we will iterate through each player in the dataframe, and add their advanced metrics.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[276]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">get_advanced</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Year&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;PER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;WS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;BPM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ad</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[276]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Player</th>
+      <th>Age</th>
+      <th>Tm</th>
+      <th>FG%</th>
+      <th>TRB</th>
+      <th>AST</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>TOV</th>
+      <th>PTS</th>
+      <th>Year</th>
+      <th>All Star</th>
+      <th>PER</th>
+      <th>TS%</th>
+      <th>WS</th>
+      <th>BPM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>LaMarcus Aldridge</td>
+      <td>24</td>
+      <td>POR</td>
+      <td>0.495</td>
+      <td>8.0</td>
+      <td>2.1</td>
+      <td>0.9</td>
+      <td>0.6</td>
+      <td>1.3</td>
+      <td>17.9</td>
+      <td>2010</td>
+      <td>0</td>
+      <td>18.2</td>
+      <td>0.535</td>
+      <td>8.8</td>
+      <td>1.2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Ray Allen*</td>
+      <td>34</td>
+      <td>BOS</td>
+      <td>0.477</td>
+      <td>3.2</td>
+      <td>2.6</td>
+      <td>0.8</td>
+      <td>0.3</td>
+      <td>1.6</td>
+      <td>16.3</td>
+      <td>2010</td>
+      <td>0</td>
+      <td>15.2</td>
+      <td>0.601</td>
+      <td>7.9</td>
+      <td>1.2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Carmelo Anthony</td>
+      <td>25</td>
+      <td>DEN</td>
+      <td>0.458</td>
+      <td>6.6</td>
+      <td>3.2</td>
+      <td>1.3</td>
+      <td>0.4</td>
+      <td>3.0</td>
+      <td>28.2</td>
+      <td>2010</td>
+      <td>1</td>
+      <td>22.2</td>
+      <td>0.548</td>
+      <td>7.9</td>
+      <td>2.3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Gilbert Arenas</td>
+      <td>28</td>
+      <td>WAS</td>
+      <td>0.411</td>
+      <td>4.2</td>
+      <td>7.2</td>
+      <td>1.3</td>
+      <td>0.3</td>
+      <td>3.7</td>
+      <td>22.6</td>
+      <td>2010</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Trevor Ariza</td>
+      <td>24</td>
+      <td>HOU</td>
+      <td>0.394</td>
+      <td>5.6</td>
+      <td>3.8</td>
+      <td>1.8</td>
+      <td>0.6</td>
+      <td>2.2</td>
+      <td>14.9</td>
+      <td>2010</td>
+      <td>0</td>
+      <td>13.3</td>
+      <td>0.488</td>
+      <td>3.2</td>
+      <td>0.5</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Step-4:-Making-the-new-model">Step 4: Making the new model<a class="anchor-link" href="#Step-4:-Making-the-new-model">&#182;</a></h2><p>Now, we will create a random forest using the same method we used above, and see how it compares.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[277]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model2</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">()</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Player&#39;</span><span class="p">,</span><span class="s1">&#39;Tm&#39;</span><span class="p">,</span><span class="s1">&#39;FG%&#39;</span><span class="p">,</span><span class="s1">&#39;Year&#39;</span><span class="p">,</span><span class="s1">&#39;All Star&#39;</span><span class="p">])</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;All Star&#39;</span><span class="p">]</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span> <span class="mf">0.3</span><span class="p">)</span>
+<span class="n">model2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span><span class="n">y_train</span><span class="p">)</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">model2</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[277]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>0.93042071197411</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Unfortuanely, the accuracy is only slightly better. It appears that advnaced metrics aren't incredibly helpful for determing All Stars.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Step-5:-Predicting-2021's-All-Stars!">Step 5: Predicting 2021's All Stars!<a class="anchor-link" href="#Step-5:-Predicting-2021's-All-Stars!">&#182;</a></h2><p>We will now use our model to predict the All Stars for the upcoming NBA season. Using the same method we did above, import the players statistics for the 2021 season so far.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[278]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nba21</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;NBA21.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="n">nba21</span><span class="p">[</span><span class="s1">&#39;All Star %&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">nba21</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[278]:</div>
 
 
 
@@ -14617,222 +16368,101 @@ a.anchor-link {
       <th>TOV</th>
       <th>PTS</th>
       <th>All Star %</th>
-      <th>Conference</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>202</th>
-      <td>222</td>
-      <td>223</td>
-      <td>LeBron James\jamesle01</td>
-      <td>SF</td>
-      <td>37</td>
-      <td>LAL</td>
-      <td>0.504</td>
-      <td>0.358</td>
-      <td>5.9</td>
-      <td>6.9</td>
-      <td>1.8</td>
-      <td>0.9</td>
-      <td>3.6</td>
-      <td>26.1</td>
-      <td>0.95</td>
-      <td>West</td>
-    </tr>
-    <tr>
-      <th>399</th>
-      <td>435</td>
-      <td>436</td>
-      <td>Karl-Anthony Towns\townska01</td>
+      <th>0</th>
+      <td>0</td>
+      <td>1</td>
+      <td>Precious Achiuwa\achiupr01</td>
       <td>C</td>
-      <td>26</td>
-      <td>MIN</td>
-      <td>0.508</td>
-      <td>0.423</td>
-      <td>9.0</td>
-      <td>3.3</td>
-      <td>1.1</td>
-      <td>1.1</td>
-      <td>3.5</td>
-      <td>24.3</td>
-      <td>0.89</td>
-      <td>West</td>
-    </tr>
-    <tr>
-      <th>98</th>
-      <td>108</td>
-      <td>109</td>
-      <td>Anthony Davis\davisan02</td>
-      <td>C</td>
-      <td>28</td>
-      <td>LAL</td>
-      <td>0.520</td>
-      <td>0.182</td>
-      <td>10.2</td>
-      <td>3.0</td>
-      <td>1.2</td>
-      <td>2.1</td>
-      <td>2.2</td>
-      <td>23.8</td>
-      <td>0.88</td>
-      <td>West</td>
-    </tr>
-    <tr>
-      <th>212</th>
-      <td>233</td>
-      <td>234</td>
-      <td>Nikola Jokić\jokicni01</td>
-      <td>C</td>
-      <td>26</td>
-      <td>DEN</td>
-      <td>0.588</td>
-      <td>0.379</td>
-      <td>13.6</td>
-      <td>7.5</td>
-      <td>1.3</td>
-      <td>0.7</td>
-      <td>3.4</td>
-      <td>26.6</td>
-      <td>0.86</td>
-      <td>West</td>
-    </tr>
-    <tr>
-      <th>106</th>
-      <td>118</td>
-      <td>119</td>
-      <td>Luka Dončić\doncilu01</td>
-      <td>PG</td>
       <td>22</td>
-      <td>DAL</td>
-      <td>0.447</td>
-      <td>0.326</td>
-      <td>8.0</td>
-      <td>8.5</td>
-      <td>1.0</td>
-      <td>0.5</td>
-      <td>4.6</td>
-      <td>25.6</td>
-      <td>0.85</td>
-      <td>West</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>419</th>
-      <td>455</td>
-      <td>456</td>
-      <td>Yuta Watanabe\watanyu01</td>
-      <td>SF</td>
-      <td>27</td>
       <td>TOR</td>
-      <td>0.360</td>
-      <td>0.343</td>
-      <td>4.0</td>
-      <td>1.2</td>
-      <td>0.4</td>
-      <td>0.7</td>
-      <td>0.2</td>
-      <td>6.1</td>
-      <td>0.00</td>
-      <td>East</td>
-    </tr>
-    <tr>
-      <th>422</th>
-      <td>459</td>
-      <td>460</td>
-      <td>Coby White\whiteco01</td>
-      <td>PG</td>
-      <td>21</td>
-      <td>CHI</td>
-      <td>0.349</td>
-      <td>0.226</td>
-      <td>2.6</td>
-      <td>1.3</td>
-      <td>0.1</td>
-      <td>0.1</td>
-      <td>0.9</td>
-      <td>6.1</td>
-      <td>0.00</td>
-      <td>East</td>
-    </tr>
-    <tr>
-      <th>429</th>
-      <td>467</td>
-      <td>468</td>
-      <td>Lou Williams\willilo02</td>
-      <td>PG</td>
-      <td>35</td>
-      <td>ATL</td>
-      <td>0.395</td>
-      <td>0.341</td>
+      <td>0.386</td>
+      <td>0.269</td>
+      <td>8.2</td>
       <td>1.6</td>
-      <td>1.2</td>
-      <td>0.7</td>
-      <td>0.1</td>
-      <td>1.0</td>
-      <td>6.8</td>
-      <td>0.00</td>
-      <td>East</td>
-    </tr>
-    <tr>
-      <th>432</th>
-      <td>471</td>
-      <td>472</td>
-      <td>Dylan Windler\windldy01</td>
-      <td>SF</td>
-      <td>25</td>
-      <td>CLE</td>
-      <td>0.442</td>
-      <td>0.379</td>
-      <td>1.7</td>
-      <td>0.9</td>
-      <td>0.3</td>
-      <td>0.1</td>
-      <td>0.4</td>
-      <td>2.7</td>
-      <td>0.00</td>
-      <td>East</td>
-    </tr>
-    <tr>
-      <th>436</th>
-      <td>476</td>
-      <td>477</td>
-      <td>Delon Wright\wrighde01</td>
-      <td>SG</td>
-      <td>29</td>
-      <td>ATL</td>
-      <td>0.368</td>
-      <td>0.348</td>
-      <td>2.7</td>
-      <td>2.2</td>
-      <td>0.7</td>
-      <td>0.2</td>
       <td>0.5</td>
-      <td>2.8</td>
-      <td>0.00</td>
-      <td>East</td>
+      <td>0.6</td>
+      <td>1.1</td>
+      <td>8.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>3</td>
+      <td>Bam Adebayo\adebaba01</td>
+      <td>C</td>
+      <td>24</td>
+      <td>MIA</td>
+      <td>0.519</td>
+      <td>0.000</td>
+      <td>10.2</td>
+      <td>3.2</td>
+      <td>1.1</td>
+      <td>0.3</td>
+      <td>2.9</td>
+      <td>18.7</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>4</td>
+      <td>Santi Aldama\aldamsa01</td>
+      <td>PF</td>
+      <td>21</td>
+      <td>MEM</td>
+      <td>0.364</td>
+      <td>0.111</td>
+      <td>2.6</td>
+      <td>0.8</td>
+      <td>0.1</td>
+      <td>0.2</td>
+      <td>0.3</td>
+      <td>3.6</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>5</td>
+      <td>LaMarcus Aldridge\aldrila01</td>
+      <td>C</td>
+      <td>36</td>
+      <td>BRK</td>
+      <td>0.573</td>
+      <td>0.367</td>
+      <td>5.7</td>
+      <td>0.9</td>
+      <td>0.4</td>
+      <td>1.2</td>
+      <td>0.8</td>
+      <td>14.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>6</td>
+      <td>Nickeil Alexander-Walker\alexani01</td>
+      <td>SG</td>
+      <td>23</td>
+      <td>NOP</td>
+      <td>0.366</td>
+      <td>0.310</td>
+      <td>3.9</td>
+      <td>2.6</td>
+      <td>1.0</td>
+      <td>0.4</td>
+      <td>1.5</td>
+      <td>13.5</td>
+      <td>0.0</td>
     </tr>
   </tbody>
 </table>
-<p>442 rows × 16 columns</p>
 </div>
 </div>
 
@@ -14842,13 +16472,26 @@ a.anchor-link {
 
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>We have created another column labeled All Star %, which will indicate the players probability of making the All Star team based on our model.</p>
+<p>We will also add a column that contains which conference they are in, as the All Star teams consist of 12 players from each conference.</p>
+
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[279]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">east</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PHI&#39;</span><span class="p">,</span> <span class="s1">&#39;BRK&#39;</span><span class="p">,</span> <span class="s1">&#39;MIL&#39;</span><span class="p">,</span> <span class="s1">&#39;NYK&#39;</span><span class="p">,</span> <span class="s1">&#39;ATL&#39;</span><span class="p">,</span> <span class="s1">&#39;MIA&#39;</span><span class="p">,</span> <span class="s1">&#39;BOS&#39;</span><span class="p">,</span> <span class="s1">&#39;WAS&#39;</span><span class="p">,</span><span class="s1">&#39;IND&#39;</span><span class="p">,</span> <span class="s1">&#39;CHA&#39;</span><span class="p">,</span> <span class="s1">&#39;CHI&#39;</span><span class="p">,</span> <span class="s1">&#39;TOR&#39;</span><span class="p">,</span> <span class="s1">&#39;CLE&#39;</span><span class="p">,</span> <span class="s1">&#39;ORL&#39;</span><span class="p">,</span> <span class="s1">&#39;DET&#39;</span><span class="p">]</span>
+<span class="n">nba21</span><span class="p">[</span><span class="s1">&#39;Conference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">nba21</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s1">&#39;Tm&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">east</span><span class="p">:</span>
+        <span class="n">nba21</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Conference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;East&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nba21</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;Conference&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;West&#39;</span>
 </pre></div>
 
      </div>
@@ -14856,6 +16499,118 @@ a.anchor-link {
 </div>
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, we will get the probabilities that each player has of making the All Star team.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[280]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pos&#39;</span><span class="p">,</span><span class="s1">&#39;Conference&#39;</span><span class="p">,</span><span class="s1">&#39;Rk&#39;</span><span class="p">,</span> <span class="s1">&#39;Player&#39;</span><span class="p">,</span> <span class="s1">&#39;Tm&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span> <span class="s1">&#39;All Star %&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">])</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="n">probabilities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Probabilitis is now a 2d Array, where the first element is the probability a player does not make the All Star team, and the second element is the probabilty they will.</p>
+<p>We will now go through the nba 2021 dataframe, and add the probability the player will make the all Star team. We will store this data in a TSV file.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[284]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">r</span> <span class="ow">in</span> <span class="n">nba21</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="n">nba21</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;All Star %&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">441</span><span class="p">:</span>
+        <span class="k">break</span>
+<span class="n">nba21</span> <span class="o">=</span> <span class="n">nba21</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Conference&#39;</span><span class="p">,</span><span class="s1">&#39;All Star %&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">nba21</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;AllStarPredictions.tsv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Now, in order to make our predictions, we will look at the top 12 players with the highest percent chance of making the All Star team in each conference. The results are as follows:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>WEST:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<ol>
+<li>Lebron James</li>
+<li>Karl Anothony-Towns</li>
+<li>Anothony Davis</li>
+<li>Luka Doncic</li>
+<li>Paul George</li>
+<li>Nikola Jokic</li>
+<li>Russel Westbrook</li>
+<li>Ja Morant</li>
+<li>Stephen Curry</li>
+<li>Donovan Mitchell </li>
+<li>Devin Booker</li>
+<li>Chris Paul</li>
+</ol>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>EAST:</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<ol>
+<li>Kevin Durant</li>
+<li>Joel Embiid</li>
+<li>Jimmy Butler</li>
+<li>James Harden</li>
+<li>Trae Young</li>
+<li>DeMar Derozen</li>
+<li>Zach Lavine</li>
+<li>Jason Tatus</li>
+<li>Damontis Sabonis</li>
+<li>Bradley Beal</li>
+<li>Darius Garland</li>
+<li>Jaylen Brown</li>
+</ol>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Conclusion:">Conclusion:<a class="anchor-link" href="#Conclusion:">&#182;</a></h2><p>We managed to make a model that predics at 93%, so I would say that that is pretty succesful. However, I do think there are several ways in which we can improve. As a good portion of All Stars are selected by fan vote, I think that taking into account a player's popularity would be a good metric to keep track of. One way in which we could do this is by scraping the players social media followers.</p>
+<p>Also, the model currently compares all the plaeyrs in the NBA together, where it should really be comparing the players only to those in their same conference. This can make a big difference in a year where the players in one conference are significantly better than the other.</p>
+<p>I hope that you learned a lot about Data Science through this walkthrough and saw how applicable it can be!</p>
+
+</div>
 </div>
 </body>
 
